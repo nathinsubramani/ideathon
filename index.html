@@ -1,76 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terrace Garden Monitor</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .moisture-level {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    .button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      text-align: center;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .button:hover {
-      background-color: #45a049;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeMCU Control Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #togglePump {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+        }
+        #moistureLevel {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <h1>Terrace Garden Monitor</h1>
-  <div class="container">
-    <div class="moisture-level">Moisture Level: <span id="moisture">Loading...</span></div>
-    <button class="button" onclick="togglePump()">Toggle Pump</button>
-  </div>
+    <h1>NodeMCU Control Panel</h1>
+    <div class="container">
+        <button class="button" id="togglePump" onclick="togglePump()">Toggle Pump</button>
+        <button class="button" id="moistureLevel" onclick="viewMoistureLevel()">View Moisture Level</button>
+    </div>
 
-  <script>
-    function togglePump() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/togglePump", true);
-      xhr.onload = function () {
-        if (xhr.status == 200) {
-          updateMoistureLevel();
+    <script>
+        function togglePump() {
+            fetch('/togglePump', { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert(data);
+                })
+                .catch(error => {
+                    console.error('There was an error with the fetch operation:', error);
+                });
         }
-      };
-      xhr.send();
-    }
 
-    function updateMoistureLevel() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/moisture", true);
-      xhr.onload = function () {
-        if (xhr.status == 200) {
-          document.getElementById("moisture").textContent = xhr.responseText;
+        function viewMoistureLevel() {
+            fetch('/moistureLevel')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert('Moisture Level: ' + data);
+                })
+                .catch(error => {
+                    console.error('There was an error with the fetch operation:', error);
+                });
         }
-      };
-      xhr.send();
-    }
-
-    setInterval(updateMoistureLevel, 5000); // Update moisture level every 5 seconds
-    updateMoistureLevel(); // Initial update
-  </script>
+    </script>
 </body>
 </html>
